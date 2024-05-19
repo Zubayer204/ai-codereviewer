@@ -143,7 +143,7 @@ async function getAIResponse(prompt: string): Promise<Array<{
   };
 
   console.log(`Querying OpenAI[${OPENAI_API_MODEL}] with prompt: ${prompt}`);
-  const json_enabled = (OPENAI_API_MODEL in JSONEnabledAIModels)
+  const json_enabled = true; // TODO: make this configurable
   console.log(`JSON Enabled: ${json_enabled}`)
 
   try {
