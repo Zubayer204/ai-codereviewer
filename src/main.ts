@@ -24,6 +24,17 @@ interface PRDetails {
   description: string;
 }
 
+const JSONEnabledAIModels = [
+    "gpt-4-turbo-preview",
+    "gpt-4-turbo",
+    "gpt-4o",
+    "gpt-3.5-turbo",
+    "gpt-4-0125-preview",
+    "gpt-4-1106-preview",
+    "gpt-3.5-turbo-0125",
+    "gpt-3.5-turbo-1106"
+]
+
 async function getPRDetails(): Promise<PRDetails> {
   const { repository, number } = JSON.parse(
     readFileSync(process.env.GITHUB_EVENT_PATH || "", "utf8")
@@ -131,13 +142,15 @@ async function getAIResponse(prompt: string): Promise<Array<{
     presence_penalty: 0,
   };
 
+  console.log(`Querying OpenAI[${OPENAI_API_MODEL}] with prompt: ${prompt}`);
+  const json_enabled = (OPENAI_API_MODEL in JSONEnabledAIModels)
+  console.log(`JSON Enabled: ${json_enabled}`)
+
   try {
     const response = await openai.chat.completions.create({
       ...queryConfig,
       // return JSON if the model supports it:
-      ...(OPENAI_API_MODEL === "gpt-4-turbo-preview" || OPENAI_API_MODEL === "gpt-4-turbo" || OPENAI_API_MODEL === "gpt-4o" || OPENAI_API_MODEL === "gpt-3.5-turbo" || OPENAI_API_MODEL === "gpt-4-0125-preview" || OPENAI_API_MODEL === "gpt-4-1106-preview" || OPENAI_API_MODEL === "gpt-3.5-turbo-0125" || OPENAI_API_MODEL === "gpt-3.5-turbo-1106"
-        ? { response_format: { type: "json_object" } }
-        : {}),
+      ...(json_enabled ? { response_format: { type: "json_object" } }: {}),
       messages: [
         {
           role: "system",
